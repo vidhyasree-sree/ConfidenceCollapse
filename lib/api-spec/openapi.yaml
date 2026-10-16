@@ -3,20 +3,26 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API for the Confidence Collapse ML monitoring platform
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: dashboard
+  - name: datasets
+  - name: models
+  - name: predictions
+  - name: monitoring
+  - name: alerts
+  - name: settings
+  - name: reports
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +30,622 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get live dashboard counts and recent activity
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /datasets:
+    get:
+      operationId: listDatasets
+      tags: [datasets]
+      summary: List uploaded datasets
+      responses:
+        "200":
+          description: Datasets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Dataset"
+    post:
+      operationId: uploadDataset
+      tags: [datasets]
+      summary: Parse, validate, and persist an uploaded CSV
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DatasetInput"
+      responses:
+        "201":
+          description: Dataset created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dataset"
+        "400":
+          description: Invalid CSV or dataset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /datasets/{datasetId}:
+    get:
+      operationId: getDataset
+      tags: [datasets]
+      summary: Get dataset details and a preview
+      parameters:
+        - $ref: "#/components/parameters/DatasetId"
+      responses:
+        "200":
+          description: Dataset details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatasetDetail"
+        "404":
+          description: Dataset not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      operationId: deleteDataset
+      tags: [datasets]
+      summary: Delete a dataset that is not in use by a model
+      parameters:
+        - $ref: "#/components/parameters/DatasetId"
+      responses:
+        "204":
+          description: Dataset deleted
+        "409":
+          description: Dataset is referenced by a model
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /models:
+    get:
+      operationId: listModels
+      tags: [models]
+      summary: List trained models and their real evaluation metrics
+      responses:
+        "200":
+          description: Trained models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Model"
+  /models/train:
+    post:
+      operationId: trainModel
+      tags: [models]
+      summary: Train and evaluate a classifier on a persisted dataset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrainModelInput"
+      responses:
+        "201":
+          description: Model trained and evaluated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Model"
+        "400":
+          description: Invalid training request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /models/{modelId}:
+    get:
+      operationId: getModel
+      tags: [models]
+      summary: Get model metadata, evaluation, and feature importance
+      parameters:
+        - $ref: "#/components/parameters/ModelId"
+      responses:
+        "200":
+          description: Model details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Model"
+        "404":
+          description: Model not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /models/{modelId}/predict:
+    post:
+      operationId: predictWithModel
+      tags: [predictions]
+      summary: Generate predictions and probabilities for submitted rows
+      parameters:
+        - $ref: "#/components/parameters/ModelId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PredictionInput"
+      responses:
+        "200":
+          description: Predictions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PredictionBatch"
+        "400":
+          description: Invalid prediction request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /models/{modelId}/predictions:
+    get:
+      operationId: listPredictions
+      tags: [predictions]
+      summary: List persisted evaluation and generated predictions
+      parameters:
+        - $ref: "#/components/parameters/ModelId"
+      responses:
+        "200":
+          description: Prediction history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Prediction"
+  /monitoring/runs:
+    get:
+      operationId: listMonitoringRuns
+      tags: [monitoring]
+      summary: List persisted monitoring runs
+      responses:
+        "200":
+          description: Monitoring history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonitoringRun"
+    post:
+      operationId: runMonitoring
+      tags: [monitoring]
+      summary: Compare incoming data to a model baseline and persist computed drift and alerts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonitoringInput"
+      responses:
+        "201":
+          description: Monitoring results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitoringRun"
+        "400":
+          description: Invalid monitoring request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /alerts:
+    get:
+      operationId: listAlerts
+      tags: [alerts]
+      summary: List evidence-based alerts
+      responses:
+        "200":
+          description: Alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"
+  /alerts/{alertId}:
+    patch:
+      operationId: updateAlert
+      tags: [alerts]
+      summary: Resolve or reopen an alert
+      parameters:
+        - $ref: "#/components/parameters/AlertId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertUpdate"
+      responses:
+        "200":
+          description: Updated alert
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+        "404":
+          description: Alert not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get monitoring thresholds
+      responses:
+        "200":
+          description: Current settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+    patch:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update monitoring thresholds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsInput"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+  /reports/{modelId}:
+    get:
+      operationId: getModelReport
+      tags: [reports]
+      summary: Get report-ready evaluation, prediction, monitoring, and alert data
+      parameters:
+        - $ref: "#/components/parameters/ModelId"
+      responses:
+        "200":
+          description: Report data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelReport"
+        "404":
+          description: Model not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
+  parameters:
+    DatasetId:
+      name: datasetId
+      in: path
+      required: true
+      schema:
+        type: string
+    ModelId:
+      name: modelId
+      in: path
+      required: true
+      schema:
+        type: string
+    AlertId:
+      name: alertId
+      in: path
+      required: true
+      schema:
+        type: string
   schemas:
     HealthStatus:
       type: object
       properties:
         status:
           type: string
-      required:
-        - status
-
+      required: [status]
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    DashboardSummary:
+      type: object
+      properties:
+        datasetCount: { type: integer }
+        modelCount: { type: integer }
+        openAlertCount: { type: integer }
+        latestAccuracy: { type: ["number", "null"] }
+        latestDriftScore: { type: ["number", "null"] }
+        latestRunAt: { type: ["string", "null"], format: date-time }
+        activity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityItem"
+      required: [datasetCount, modelCount, openAlertCount, latestAccuracy, latestDriftScore, latestRunAt, activity]
+    ActivityItem:
+      type: object
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [dataset, model, monitoring, alert] }
+        title: { type: string }
+        detail: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, kind, title, detail, createdAt]
+    DatasetInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 180 }
+        purpose: { type: string, enum: [reference, incoming] }
+        csvContent: { type: string, minLength: 1 }
+        targetColumn: { type: ["string", "null"] }
+      required: [name, purpose, csvContent]
+    Dataset:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        purpose: { type: string, enum: [reference, incoming] }
+        rowCount: { type: integer }
+        columnCount: { type: integer }
+        targetColumn: { type: ["string", "null"] }
+        columns:
+          type: array
+          items: { $ref: "#/components/schemas/ColumnSummary" }
+        missingCellCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, purpose, rowCount, columnCount, targetColumn, columns, missingCellCount, createdAt]
+    DatasetDetail:
+      allOf:
+        - $ref: "#/components/schemas/Dataset"
+        - type: object
+          properties:
+            preview:
+              type: array
+              items: { $ref: "#/components/schemas/Row" }
+            columns:
+              type: array
+              items: { $ref: "#/components/schemas/ColumnSummary" }
+          required: [preview]
+    ColumnSummary:
+      type: object
+      properties:
+        name: { type: string }
+        type: { type: string, enum: [numeric, categorical] }
+        missingValues: { type: integer }
+        uniqueValues: { type: integer }
+        mean: { type: ["number", "null"] }
+      required: [name, type, missingValues, uniqueValues, mean]
+    Row:
+      type: object
+      additionalProperties:
+        oneOf:
+          - { type: string }
+          - { type: number }
+          - { type: boolean }
+          - { type: "null" }
+    TrainModelInput:
+      type: object
+      properties:
+        datasetId: { type: string }
+        targetColumn: { type: string }
+        algorithm: { type: string, enum: [decision_tree, random_forest] }
+        testSize: { type: number, minimum: 0.1, maximum: 0.5 }
+        randomSeed: { type: integer, minimum: 0, maximum: 2147483647 }
+        maxDepth: { type: integer, minimum: 1, maximum: 12 }
+        estimators: { type: integer, minimum: 1, maximum: 100 }
+      required: [datasetId, targetColumn, algorithm, testSize, randomSeed, maxDepth, estimators]
+    Model:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        datasetId: { type: string }
+        datasetName: { type: string }
+        targetColumn: { type: string }
+        algorithm: { type: string, enum: [decision_tree, random_forest] }
+        testSize: { type: number }
+        randomSeed: { type: integer }
+        trainedAt: { type: string, format: date-time }
+        rowCount: { type: integer }
+        featureCount: { type: integer }
+        classes:
+          type: array
+          items: { type: string }
+        metrics: { $ref: "#/components/schemas/EvaluationMetrics" }
+        featureImportances:
+          type: array
+          items: { $ref: "#/components/schemas/FeatureImportance" }
+      required: [id, name, datasetId, datasetName, targetColumn, algorithm, testSize, randomSeed, trainedAt, rowCount, featureCount, classes, metrics, featureImportances]
+    EvaluationMetrics:
+      type: object
+      properties:
+        accuracy: { type: number }
+        precision: { type: number }
+        recall: { type: number }
+        f1: { type: number }
+        averaging: { type: string, enum: [binary, macro] }
+        confusionMatrix:
+          type: array
+          items:
+            type: array
+            items: { type: integer }
+        perClass:
+          type: array
+          items: { $ref: "#/components/schemas/ClassMetric" }
+      required: [accuracy, precision, recall, f1, averaging, confusionMatrix, perClass]
+    ClassMetric:
+      type: object
+      properties:
+        label: { type: string }
+        precision: { type: number }
+        recall: { type: number }
+        f1: { type: number }
+        support: { type: integer }
+      required: [label, precision, recall, f1, support]
+    FeatureImportance:
+      type: object
+      properties:
+        feature: { type: string }
+        importance: { type: number }
+      required: [feature, importance]
+    PredictionInput:
+      type: object
+      properties:
+        rows:
+          type: array
+          minItems: 1
+          maxItems: 5000
+          items: { $ref: "#/components/schemas/Row" }
+      required: [rows]
+    Prediction:
+      type: object
+      properties:
+        id: { type: string }
+        modelId: { type: string }
+        rowIndex: { type: integer }
+        predictedLabel: { type: string }
+        actualLabel: { type: ["string", "null"] }
+        confidence: { type: number }
+        probabilities:
+          type: object
+          additionalProperties: { type: number }
+        source: { type: string, enum: [evaluation, manual] }
+        createdAt: { type: string, format: date-time }
+      required: [id, modelId, rowIndex, predictedLabel, actualLabel, confidence, probabilities, source, createdAt]
+    PredictionBatch:
+      type: object
+      properties:
+        modelId: { type: string }
+        predictions:
+          type: array
+          items: { $ref: "#/components/schemas/Prediction" }
+        distribution:
+          type: object
+          additionalProperties: { type: integer }
+      required: [modelId, predictions, distribution]
+    MonitoringInput:
+      type: object
+      properties:
+        modelId: { type: string }
+        datasetId: { type: string }
+      required: [modelId, datasetId]
+    MonitoringRun:
+      type: object
+      properties:
+        id: { type: string }
+        modelId: { type: string }
+        modelName: { type: string }
+        datasetId: { type: string }
+        datasetName: { type: string }
+        createdAt: { type: string, format: date-time }
+        rowCount: { type: integer }
+        overallDriftScore: { type: number }
+        featureDrift:
+          type: array
+          items: { $ref: "#/components/schemas/FeatureDrift" }
+        predictionDistribution:
+          type: object
+          additionalProperties: { type: integer }
+        referencePredictionDistribution:
+          type: object
+          additionalProperties: { type: integer }
+        predictionDriftScore: { type: number }
+        performance: { oneOf: [{ $ref: "#/components/schemas/EvaluationMetrics" }, { type: "null" }] }
+        performanceStatus: { type: string, enum: [not_measured, stable, degraded] }
+        alertIds:
+          type: array
+          items: { type: string }
+      required: [id, modelId, modelName, datasetId, datasetName, createdAt, rowCount, overallDriftScore, featureDrift, predictionDistribution, referencePredictionDistribution, predictionDriftScore, performance, performanceStatus, alertIds]
+    FeatureDrift:
+      type: object
+      properties:
+        feature: { type: string }
+        type: { type: string, enum: [numeric, categorical] }
+        score: { type: number }
+        pValue: { type: ["number", "null"] }
+        method: { type: string, enum: [kolmogorov_smirnov, chi_square, unavailable] }
+        status: { type: string, enum: [low, warning, high, unavailable] }
+        referenceDistribution:
+          type: array
+          items: { $ref: "#/components/schemas/DistributionBin" }
+        currentDistribution:
+          type: array
+          items: { $ref: "#/components/schemas/DistributionBin" }
+      required: [feature, type, score, pValue, method, status, referenceDistribution, currentDistribution]
+    DistributionBin:
+      type: object
+      properties:
+        label: { type: string }
+        count: { type: integer }
+      required: [label, count]
+    Alert:
+      type: object
+      properties:
+        id: { type: string }
+        modelId: { type: string }
+        monitoringRunId: { type: string }
+        severity: { type: string, enum: [low, medium, high] }
+        title: { type: string }
+        explanation: { type: string }
+        recommendedAction: { type: string }
+        status: { type: string, enum: [open, resolved] }
+        createdAt: { type: string, format: date-time }
+      required: [id, modelId, monitoringRunId, severity, title, explanation, recommendedAction, status, createdAt]
+    AlertUpdate:
+      type: object
+      properties:
+        status: { type: string, enum: [open, resolved] }
+      required: [status]
+    Settings:
+      type: object
+      properties:
+        driftThreshold: { type: number }
+        predictionDriftThreshold: { type: number }
+        performanceDropThreshold: { type: number }
+      required: [driftThreshold, predictionDriftThreshold, performanceDropThreshold]
+    SettingsInput:
+      type: object
+      properties:
+        driftThreshold: { type: number, minimum: 0, maximum: 1 }
+        predictionDriftThreshold: { type: number, minimum: 0, maximum: 1 }
+        performanceDropThreshold: { type: number, minimum: 0, maximum: 1 }
+      required: [driftThreshold, predictionDriftThreshold, performanceDropThreshold]
+    ModelReport:
+      type: object
+      properties:
+        model: { $ref: "#/components/schemas/Model" }
+        predictions:
+          type: array
+          items: { $ref: "#/components/schemas/Prediction" }
+        monitoringRuns:
+          type: array
+          items: { $ref: "#/components/schemas/MonitoringRun" }
+        alerts:
+          type: array
+          items: { $ref: "#/components/schemas/Alert" }
+      required: [model, predictions, monitoringRuns, alerts]

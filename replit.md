@@ -1,6 +1,6 @@
-# [Project name]
+# Confidence Collapse
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A machine-learning monitoring platform for uploading tabular data, training classifiers, inspecting actual evaluation and prediction results, comparing incoming data for drift, and reviewing evidence-backed alerts.
 
 ## Run & Operate
 
@@ -22,23 +22,34 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/confidence-collapse` — React + Vite web application and responsive dashboard.
+- `artifacts/api-server/src/routes/confidence-collapse.ts` — API routes for datasets, models, predictions, monitoring, alerts, reports, and settings.
+- `artifacts/api-server/src/lib/confidence-collapse` — CSV validation, classifier training, metrics, predictions, and drift calculations.
+- `lib/api-spec/openapi.yaml` — source of truth for the API contract and generated hooks.
+- `lib/db/src/schema/confidence-collapse.ts` — PostgreSQL persistence schema.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Classification and monitoring use the existing TypeScript/Express service; no second Python service is required to run the app.
+- Evaluation metrics use the held-out split; monitoring only reports performance when incoming ground-truth labels are present.
+- Drift alerts are based on measured distribution changes and configured thresholds, never seeded or generated history.
+- Uploaded tabular rows and fitted model trees are persisted in PostgreSQL; uploaded CSV content is not retained as a separate raw file.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Upload and preview CSV datasets, train Decision Tree and Random Forest classifiers, inspect class-level metrics and probabilities, run feature and prediction drift comparisons, resolve alerts, and export JSON or CSV reports.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Keep predicted class, confidence, data drift, prediction drift, and measured performance degradation distinct.
+- Use genuine backend results and show honest empty states instead of fabricated dashboard content.
+- Keep the application name consistently as Confidence Collapse.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- After editing `lib/api-spec/openapi.yaml`, run `pnpm --filter @workspace/api-spec run codegen`.
+- CSV uploads are limited to 10 MB; the API's JSON parser limit is 12 MB.
+- Database schema changes are applied to the development database with `pnpm --filter @workspace/db run push`.
 
 ## Pointers
 

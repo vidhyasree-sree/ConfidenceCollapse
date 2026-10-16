@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Confidence Collapse"
+description = "A machine-learning monitoring platform for uploading tabular datasets, training classifiers, inspecting genuine predictions and evaluation metrics, detecting data and prediction drift, managing evidence-based alerts, and exporting reports."
+version = "1.0.0"
+id = "artifacts/confidence-collapse"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22309
+
+[services.development]
+run = "pnpm --filter @workspace/confidence-collapse run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/confidence-collapse", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/confidence-collapse/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22309"
+BASE_PATH = "/"

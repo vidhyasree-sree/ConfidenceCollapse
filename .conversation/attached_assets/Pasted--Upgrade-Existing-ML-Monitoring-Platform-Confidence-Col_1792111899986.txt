@@ -1,0 +1,284 @@
+# Upgrade Existing ML Monitoring Platform — Confidence Collapse
+
+Act as an expert full-stack developer, machine learning engineer, backend engineer, and UI/UX designer.
+
+Upgrade my **existing ML Monitoring Hub website** into a complete, functional machine learning monitoring platform named **Confidence Collapse**.
+
+**Important:** Inspect the existing frontend, Python ML backend, API endpoints, database, project structure, and deployment configuration before modifying anything. Do not rebuild the website from scratch. Preserve existing functionality, structure, routes, and deployment settings wherever possible.
+
+## 1. Website Renaming
+
+Rename the entire application from **ML Monitoring Hub** to **Confidence Collapse**.
+
+Update the name consistently in:
+- Navbar and sidebar.
+- Logo text and branding.
+- Dashboard title and page headings.
+- Browser tab title and application metadata.
+- Login or registration screens, if present.
+- Loading screens, empty states, reports, and relevant interface labels.
+- Exported report titles and application-generated messages.
+
+Preserve existing URLs, routes, and deployment configuration unless a change is essential.
+
+## 2. Professional UI/UX Design
+
+Maintain the existing visual identity while improving the interface where necessary.
+
+Design requirements:
+- Clean, minimal, professional dashboard.
+- Light background with dark navy text and subtle blue or purple accents.
+- Consistent typography, spacing, rounded cards, and readable tables.
+- Responsive layouts for desktop, laptop, tablet, and mobile.
+- Accessible buttons, forms, labels, tooltips, and keyboard interactions.
+- Sidebar navigation with a functional mobile menu.
+- Light and dark modes if practical.
+- Subtle transitions without excessive animations.
+- Proper loading indicators, error messages, empty states, and confirmation feedback.
+
+Avoid unnecessary decorative elements, excessive gradients, and fabricated dashboard content.
+
+## 3. Dashboard and Navigation
+
+Preserve existing routes and functionality. Implement or improve these pages wherever appropriate to the current project:
+
+1. **Dashboard:** Dataset count, trained model count, available performance metrics, monitoring status, and recent alerts.
+2. **Dataset Management:** CSV upload, dataset preview, column types, missing values, validation, and target selection.
+3. **Model Training:** Decision Tree and Random Forest classifiers, train/test split configuration, and training status.
+4. **Model Evaluation:** Accuracy, precision, recall, F1-score, confusion matrix, and model comparisons.
+5. **Prediction Analysis:** Individual predictions, predicted classes, confidence probabilities, and prediction distributions.
+6. **Model Monitoring:** Incoming dataset analysis, prediction statistics, performance monitoring, and historical changes.
+7. **Data Drift Analysis:** Reference-versus-current feature distributions and statistical drift results.
+8. **Alerts & Insights:** Severity, timestamps, explanations, status, and recommended actions.
+9. **Reports:** Export available evaluation, prediction, and monitoring results.
+10. **Settings:** Configurable monitoring thresholds and existing application preferences.
+
+Do not remove existing working features simply to match this list.
+
+## 4. Interactive Prediction Visualizations
+
+Integrate interactive charts with actual prediction results from the existing backend.
+
+Implement:
+- Bar charts for predicted classes.
+- Prediction counts and class distributions.
+- Confidence percentages for individual predictions.
+- A clear visual highlight for the selected or inspected prediction.
+- Confidence probability charts for each available class.
+- Tooltips, readable labels, legends, and responsive chart layouts.
+- Prediction tables with actual and predicted labels when ground truth is available.
+- Filters for class, confidence range, and correct versus incorrect predictions when supported by the data.
+
+Clearly distinguish a model's predicted class from its confidence score.
+
+For multiclass classification, show class-specific probabilities where the backend provides them. Never invent probability values or treat confidence as a guarantee of correctness.
+
+Automatically refresh visualizations when new prediction results are received or when the user explicitly runs a new prediction.
+
+## 5. Model Performance Dashboard
+
+Display genuine evaluation metrics whenever available:
+
+- Accuracy.
+- Precision.
+- Recall.
+- F1-score.
+- Confusion matrix.
+- Per-class metrics for multiclass classification where appropriate.
+
+Use metric cards, comparison charts, and readable tables.
+
+Use suitable precision, recall, and F1 averaging strategies for binary and multiclass classification. Explain the selected averaging method when useful.
+
+Add performance trend line charts only when real historical evaluation records exist. Do not create artificial historical values to fill empty charts.
+
+Show an appropriate empty state when a model has not been trained or evaluated.
+
+## 6. Machine Learning Backend
+
+Inspect and reuse the existing Python ML backend and API endpoints before adding new implementations.
+
+Use the existing architecture wherever practical. Prefer Python, scikit-learn, pandas, and NumPy for machine learning functionality.
+
+Support:
+- CSV upload and parsing.
+- Dataset validation and preview.
+- Numeric and categorical feature handling.
+- Missing-value preprocessing.
+- Target column selection.
+- Reproducible train/test splits.
+- Decision Tree Classifier.
+- Random Forest Classifier.
+- Model predictions and class probabilities.
+- Accuracy, precision, recall, F1-score, and confusion matrix.
+- Feature importance where supported by the trained model.
+- Model metadata and baseline dataset statistics.
+
+If an API endpoint or required capability does not exist, implement it in the existing backend architecture rather than creating an unrelated replacement backend.
+
+Validate input data, handle invalid files, and return useful error messages. Do not report successful training unless the model was actually trained successfully.
+
+## 7. Model Monitoring and Data Drift
+
+Connect monitoring visualizations to actual backend calculations and stored results.
+
+Implement or preserve:
+- Reference dataset statistics.
+- Incoming dataset comparison.
+- Feature-level drift scores.
+- Reference-versus-current distribution charts.
+- Prediction class distribution changes.
+- Performance monitoring when labelled ground truth becomes available.
+- Monitoring history when stored records exist.
+- Configurable warning thresholds.
+
+Use suitable statistical techniques, such as the Kolmogorov–Smirnov test for appropriate numerical distributions and chi-square testing for suitable categorical distributions. Validate assumptions and sample sizes before interpreting statistical results.
+
+Clearly distinguish:
+- **Data drift:** changes in input feature distributions.
+- **Prediction drift:** changes in predicted class distributions.
+- **Performance degradation:** deterioration in measured model performance when actual labels are available.
+
+Do not claim that data drift automatically proves model performance has degraded. Do not claim that performance can be measured accurately without the necessary ground-truth labels.
+
+Display charts and comparisons only from actual reference data, incoming data, computed statistics, or persisted monitoring records.
+
+## 8. Alerts and Explainable Insights
+
+Generate alerts from genuine monitoring results.
+
+Support:
+- Low, Medium, and High severity levels.
+- Configurable thresholds.
+- Feature drift warnings.
+- Prediction distribution warnings.
+- Performance degradation alerts.
+- Timestamps and descriptions.
+- Resolved and unresolved statuses.
+- Recommended investigation steps.
+- Historical alert records when persistence is available.
+
+Generate understandable explanations based on computed evidence, such as which features changed, how metrics changed, and which thresholds were crossed.
+
+Recommendations should help the user investigate, validate data quality, review model performance, and consider retraining when justified.
+
+Never generate random alerts or fabricated explanations.
+
+## 9. Interactive Charts and Data Visualization
+
+Use the charting library already present in the project where practical. Otherwise, select a suitable library compatible with the current frontend framework.
+
+Provide:
+- Prediction class bar charts.
+- Confidence probability charts.
+- Model performance comparison charts.
+- Confusion matrix heatmaps.
+- Feature distribution plots.
+- Reference-versus-incoming distribution comparisons.
+- Feature drift score charts.
+- Metric trend lines based on persisted history.
+- Alert frequency and severity charts based on actual alerts.
+
+Ensure charts have meaningful titles, axis labels, legends, tooltips, and responsive sizing.
+
+All charts must be connected to real backend responses or stored data. Display clear empty states when the necessary data does not exist.
+
+## 10. Backend APIs, Database, and Persistence
+
+Inspect the existing API and database before making changes.
+
+Reuse existing endpoints where possible. Add or update endpoints for:
+- Dataset upload, listing, and preview.
+- Model training and metadata.
+- Model evaluation.
+- Prediction generation.
+- Prediction history.
+- Reference and incoming dataset comparisons.
+- Drift analysis.
+- Monitoring history.
+- Alert retrieval and status updates.
+- Report generation.
+- Application settings.
+
+Persist datasets or their required statistics, model metadata, evaluation results, prediction records, monitoring results, and alerts using the database already configured in the project.
+
+If the project lacks suitable persistence, add an appropriate database integration compatible with its deployment environment.
+
+Use environment variables for secrets and configuration. Do not expose credentials in frontend code. Preserve existing authentication and access controls.
+
+## 11. Complete User Workflow
+
+Ensure this workflow works end to end:
+
+1. Open the existing website under the new Confidence Collapse branding.
+2. Upload a valid CSV dataset.
+3. Preview and validate the data.
+4. Select a target column.
+5. Choose Decision Tree or Random Forest.
+6. Configure the train/test split and train the model.
+7. Display actual evaluation metrics and the confusion matrix.
+8. Generate predictions and show class probabilities where supported.
+9. Display interactive prediction charts and class distributions.
+10. Save model metadata and reference statistics.
+11. Upload or submit a comparable incoming dataset.
+12. Calculate and visualize feature drift.
+13. Evaluate prediction drift and performance degradation where supported.
+14. Generate alerts from actual results.
+15. Review historical records when available.
+16. Export a report containing actual computed results.
+
+All primary buttons, forms, navigation links, filters, chart interactions, and API calls must work. Do not leave important controls as decorative placeholders.
+
+## 12. Testing and Quality Assurance
+
+After implementation:
+- Test the existing frontend and backend before and after changes.
+- Test valid and invalid CSV uploads.
+- Test missing values and categorical features.
+- Test both classification algorithms.
+- Verify metrics against actual model predictions.
+- Test binary and multiclass classification.
+- Test prediction probability visualizations.
+- Test drift analysis with comparable reference and incoming datasets.
+- Test alert thresholds and severity assignment.
+- Test empty states, API errors, and loading states.
+- Verify persistence after application restart.
+- Test all modified navigation routes and primary buttons.
+- Check responsive layouts and accessibility.
+- Run available automated tests and production builds.
+- Fix regressions introduced by the changes.
+- Confirm that the website name is consistently Confidence Collapse.
+
+Do not claim that a test passed unless it was actually executed.
+
+## 13. Implementation Strategy
+
+Work directly in the existing project in logical stages:
+
+**Stage 1:** Inspect the existing frontend, backend, API, database, dependencies, and deployment setup.
+
+**Stage 2:** Rename the application to Confidence Collapse and preserve existing functionality.
+
+**Stage 3:** Integrate real prediction visualizations and model performance charts.
+
+**Stage 4:** Connect data drift analysis, monitoring history, and alerts to actual backend results.
+
+**Stage 5:** Implement missing API or persistence functionality only where needed.
+
+**Stage 6:** Test the complete workflow, fix regressions, and verify responsive behavior.
+
+Prioritize functional end-to-end integration over decorative design. Do not rebuild the application from scratch or replace working backend functionality without a clear technical reason.
+
+## 14. Final Deliverables
+
+When finished, provide:
+- A summary of the existing project components inspected.
+- A summary of the changes made.
+- The final technology stack.
+- API endpoints added or modified.
+- Database and persistence changes.
+- Testing performed and actual results.
+- Exact setup and run instructions.
+- Any remaining limitations or external configuration requirements.
+
+**Final requirement:** Implement the changes directly in my existing project. The entire website must consistently use the name **Confidence Collapse**, and prediction charts, evaluation metrics, drift visualizations, and alerts must use genuine backend data rather than placeholders.
